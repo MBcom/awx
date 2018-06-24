@@ -5,6 +5,15 @@ AWX
 This a fork of the official AWX Project on GitHub. This AWX has a more user readable email notification.
 The Web UI is changed too - for better integration in the daily admin workflow.
 
+some impressions
+--------
+![screenshot1](https://user-images.githubusercontent.com/27956078/41818184-a59e49d0-77a9-11e8-94e8-ca0bb9a9d3af.png)
+- landing page
+![screenshot3](https://user-images.githubusercontent.com/27956078/41818197-f1d9d26a-77a9-11e8-9662-d773b674a057.png)
+- opened menu bar
+![screenshot2](https://user-images.githubusercontent.com/27956078/41818202-084b53a2-77aa-11e8-9d46-956951f0c9f7.png)
+- login screen
+
 The following information are related to the official AWX project:
 -------
 AWX provides a web-based user interface, REST API, and task engine built on top of [Ansible](https://github.com/ansible/ansible). It is the upstream project for [Tower](https://www.ansible.com/tower), a commercial derivative of AWX.  
