@@ -2,7 +2,11 @@
 
 AWX
 ===
+This a fork of the official AWX Project on GitHub. This AWX has a more user readable email notification.
+The Web UI is changed too - for better integration in the daily admin workflow.
 
+The following information are related to the official AWX project:
+-------
 AWX provides a web-based user interface, REST API, and task engine built on top of [Ansible](https://github.com/ansible/ansible). It is the upstream project for [Tower](https://www.ansible.com/tower), a commercial derivative of AWX.  
 
 To install AWX, please view the [Install guide](./INSTALL.md).
