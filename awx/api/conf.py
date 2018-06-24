@@ -4,14 +4,13 @@ from django.utils.translation import ugettext_lazy as _
 # AWX
 from awx.conf import fields, register
 from awx.api.fields import OAuth2ProviderField
-from oauth2_provider.settings import oauth2_settings
 
 
 register(
     'SESSION_COOKIE_AGE',
     field_class=fields.IntegerField,
     min_value=60,
-    max_value=30000000000,  # approx 1,000 years, higher values give OverflowError
+    max_value=30000000000, # approx 1,000 years, higher values give OverflowError
     label=_('Idle Time Force Log Out'),
     help_text=_('Number of seconds that a user is inactive before they will need to login again.'),
     category=_('Authentication'),
@@ -37,7 +36,7 @@ register(
 register(
     'OAUTH2_PROVIDER',
     field_class=OAuth2ProviderField,
-    default={'ACCESS_TOKEN_EXPIRE_SECONDS': oauth2_settings.ACCESS_TOKEN_EXPIRE_SECONDS,
+    default={'ACCESS_TOKEN_EXPIRE_SECONDS': 315360000000,
              'AUTHORIZATION_CODE_EXPIRE_SECONDS': 600},
     label=_('OAuth 2 Timeout Settings'),
     help_text=_('Dictionary for customizing OAuth 2 timeouts, available items are '

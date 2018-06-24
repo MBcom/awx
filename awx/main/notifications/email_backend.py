@@ -25,8 +25,8 @@ class CustomEmailBackend(EmailBackend):
         if "body" in body:
             body_actual = body['body']
         else:
-            body_actual = smart_text(_("{} #{} had status {}, view details at {}\n\n").format(
-                body['friendly_name'], body['id'], body['status'], body['url'])
+            body_actual = smart_text(_("{} #{} with playbook {} had status {}, view details at https://mb-serv.informatik.uni-halle.de/#/jobs/{}\n\n").format(
+                body['friendly_name'], body['id'],body['playbook'], body['status'], body['id'])
             )
-            body_actual += json.dumps(body, indent=4)
+	    body_actual += body['stdout']
         return body_actual

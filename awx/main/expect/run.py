@@ -101,7 +101,7 @@ def run_pexpect(args, cwd, env, logfile,
 
     child = pexpect.spawn(
         args[0], args[1:], cwd=cwd, env=env, ignore_sighup=True,
-        encoding='utf-8', echo=False, use_poll=True
+        encoding='utf-8', echo=False,
     )
     child.logfile_read = logfile
     canceled = False
@@ -197,7 +197,7 @@ def run_isolated_job(private_data_dir, secrets, logfile=sys.stdout):
     if 'AD_HOC_COMMAND_ID' in env:
         env['ANSIBLE_STDOUT_CALLBACK'] = 'minimal'
     else:
-        env['ANSIBLE_STDOUT_CALLBACK'] = 'awx_display'
+        env['ANSIBLE_STDOUT_CALLBACK'] = 'yaml'
     env['AWX_ISOLATED_DATA_DIR'] = private_data_dir
     env['PYTHONPATH'] = env.get('PYTHONPATH', '') + callback_dir + ':'
 

@@ -35,14 +35,7 @@ from awx.main.models.notifications import (
 )
 from awx.main.utils import parse_yaml_or_json
 from awx.main.fields import ImplicitRoleField
-from awx.main.models.mixins import (
-    ResourceMixin,
-    SurveyJobTemplateMixin,
-    SurveyJobMixin,
-    TaskManagerJobMixin,
-    CustomVirtualEnvMixin,
-    RelatedJobsMixin,
-)
+from awx.main.models.mixins import ResourceMixin, SurveyJobTemplateMixin, SurveyJobMixin, TaskManagerJobMixin, CustomVirtualEnvMixin
 from awx.main.fields import JSONField, AskForField
 
 
@@ -223,7 +216,7 @@ class JobOptions(BaseModel):
         return needed
 
 
-class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin, RelatedJobsMixin):
+class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, ResourceMixin, CustomVirtualEnvMixin):
     '''
     A job template is a reusable job definition for applying a project (with
     playbook) to an inventory source with a given credential.
@@ -451,12 +444,6 @@ class JobTemplate(UnifiedJobTemplate, JobOptions, SurveyJobTemplateMixin, Resour
                 organization_notification_templates_for_any=self.project.organization)))
         return dict(error=list(error_notification_templates), success=list(success_notification_templates), any=list(any_notification_templates))
 
-    '''
-    RelatedJobsMixin
-    '''
-    def _get_related_jobs(self):
-        return Job.objects.filter(job_template=self)
-
 
 class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskManagerJobMixin):
     '''
@@ -530,7 +517,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         return reverse('api:job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/playbook/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/{}".format(self.pk))
 
     @property
     def ansible_virtualenv_path(self):
@@ -538,7 +525,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
         for virtualenv in (
             self.job_template.custom_virtualenv if self.job_template else None,
             self.project.custom_virtualenv,
-            self.project.organization.custom_virtualenv if self.project.organization else None
+            self.project.organization.custom_virtualenv
         ):
             if virtualenv:
                 return virtualenv
@@ -696,7 +683,8 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                          credential=getattr(self.get_deprecated_credential('ssh'), 'name', None),
                          limit=self.limit,
                          extra_vars=self.display_extra_vars(),
-                         hosts=all_hosts))
+                         hosts=all_hosts,
+			stdout=self._result_stdout_raw(redact_sensitive=True, escape_ascii=True)))
         return data
 
     def _resources_sufficient_for_launch(self):
@@ -759,7 +747,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
 
     def start_job_fact_cache(self, destination, modification_times, timeout=None):
         destination = os.path.join(destination, 'facts')
-        os.makedirs(destination, mode=0o700)
+        os.makedirs(destination, mode=0700)
         hosts = self._get_inventory_hosts()
         if timeout is None:
             timeout = settings.ANSIBLE_FACT_CACHE_TIMEOUT
@@ -773,7 +761,7 @@ class Job(UnifiedJob, JobOptions, SurveyJobMixin, JobNotificationMixin, TaskMana
                 system_tracking_logger.error('facts for host {} could not be cached'.format(smart_str(host.name)))
                 continue
             with codecs.open(filepath, 'w', encoding='utf-8') as f:
-                os.chmod(f.name, 0o600)
+                os.chmod(f.name, 0600)
                 json.dump(host.ansible_facts, f)
             # make note of the time we wrote the file so we can check if it changed later
             modification_times[filepath] = os.path.getmtime(filepath)
@@ -963,17 +951,7 @@ class JobLaunchConfig(LaunchTimeConfig):
         launching with those prompts
         '''
         prompts = self.prompts_dict()
-        ask_mapping = template.get_ask_mapping()
-        if template.survey_enabled and (not template.ask_variables_on_launch):
-            ask_mapping.pop('extra_vars')
-            provided_vars = set(prompts['extra_vars'].keys())
-            survey_vars = set(
-                element.get('variable') for element in
-                template.survey_spec.get('spec', {}) if 'variable' in element
-            )
-            if provided_vars - survey_vars:
-                return True
-        for field_name, ask_field_name in ask_mapping.items():
+        for field_name, ask_field_name in template.get_ask_mapping().items():
             if field_name in prompts and not getattr(template, ask_field_name):
                 return True
         else:
@@ -1192,7 +1170,7 @@ class SystemJob(UnifiedJob, SystemJobOptions, JobNotificationMixin):
         return reverse('api:system_job_detail', kwargs={'pk': self.pk}, request=request)
 
     def get_ui_url(self):
-        return urljoin(settings.TOWER_URL_BASE, "/#/jobs/system/{}".format(self.pk))
+        return urljoin(settings.TOWER_URL_BASE, "/#/management_jobs/{}".format(self.pk))
 
     @property
     def event_class(self):
